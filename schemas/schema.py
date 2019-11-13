@@ -22,6 +22,7 @@ type_defs = """
         hello: String!
         user(username: String!): User!
         users(usernames: [String!]!): [User]!
+        post(post_id: ID): Post
     }
     type Mutation {
         create_user(name: String! username: String! password: String!): User

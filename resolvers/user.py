@@ -24,9 +24,14 @@ def resolve_users(_, info, usernames):
     return users
 
 
+@query.field("post")
+def resolve_post(_, info, post_id):
+    post = PostModel.find_by_id(post_id)
+    return post
+
+
 @mutation.field("create_user")
 def resolve_create_user(_, info, name, username, password):
-    print(name, "=============")
     user = UserModel(name=name, username=username, password=password)
     user.save_to_db()
     return user
@@ -44,3 +49,10 @@ def resolve_create_comment(_, info, user_id, post_id, text):
     comment = CommentModel(user_id=user_id, post_id=post_id, text=text)
     comment.save_to_db()
     return comment
+
+
+@Post.field('user')
+def resolve_user(root, info):
+    print('hooole')
+    user = UserModel.find_by_id(root.user_id)
+    return user

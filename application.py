@@ -1,4 +1,4 @@
-from ariadne import graphql_sync, make_executable_schema, ObjectType, QueryType, MutationType
+from ariadne import graphql_sync, make_executable_schema
 from ariadne.constants import PLAYGROUND_HTML
 from flask import Flask, request, jsonify
 from schemas.schema import type_defs
