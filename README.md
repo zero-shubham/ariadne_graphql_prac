@@ -1,2 +1,2 @@
-# adriane_graphql_prac
-Using Adriane with Flask and SqlAlchemy.
+# ariadne_graphql_prac
+Using Ariadne with Flask and SqlAlchemy.
