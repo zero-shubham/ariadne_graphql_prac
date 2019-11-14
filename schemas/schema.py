@@ -19,10 +19,10 @@ type_defs = """
         user: User!
     }
     type Query {
-        hello: String!
-        user(username: String!): User!
+        user(username: String user_id: ID): User
         users(usernames: [String!]!): [User]!
         post(post_id: ID): Post
+        comment(comment_id: ID): Comment
     }
     type Mutation {
         create_user(name: String! username: String! password: String!): User
