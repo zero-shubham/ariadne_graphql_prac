@@ -15,14 +15,13 @@ def resolve_user(_, info, **kwargs):
     user_id = kwargs.get("user_id", None)
     username = kwargs.get("username", None)
     user = None
-    print(user_id, username, "===", info, kwargs)
     if username:
         user = UserModel.find_by_username(username)
     elif user_id:
         user = UserModel.find_by_id(user_id)
     return user
 
-
+# --------QUERIES-----------
 @query.field("users")
 def resolve_users(_, info, usernames):
     users = list()
@@ -41,11 +40,12 @@ def resolve_post(_, info, post_id):
 def resolve_post(_, info, comment_id):
     comment = CommentModel.find_by_id(comment_id)
     return comment
+# --------------------------------------
 
-
+# ---------MUTATIONS-------------------
 @mutation.field("create_user")
-def resolve_create_user(_, info, name, username, password):
-    user = UserModel(name=name, username=username, password=password)
+def resolve_create_user(_, info, data):
+    user = UserModel(name=data["name"], username=data["username"], password=data["password"])
     user.save_to_db()
     return user
 
@@ -64,10 +64,40 @@ def resolve_create_comment(_, info, user_id, post_id, text):
     return comment
 
 
+@mutation.field("update_user")
+def resolve_update_user(_, info, data):
+    user = UserModel.find_by_id(data["user_id"])
+    for key in data.keys():
+        if key == "password":
+            user.password = data[key]
+        elif key == "username":
+            user.username = data[key]
+        elif key == "name":
+            user.name = data[key]
+    user.save_to_db()
+    return user
+
+
+@mutation.field("update_post")
+def resolve_update_post(_, info, post_id, text):
+    post = PostModel.find_by_id(post_id)
+    post.text = text
+    post.save_to_db()
+    return post
+
+
+@mutation.field("update_comment")
+def resolve_update_comment(_, info, comment_id, text):
+    comment = CommentModel.find_by_id(comment_id)
+    comment.text = text
+    comment.save_to_db()
+    return comment
+# ---------------------------------
+
+
 @Post.field('user')
 def resolve_user(root, info):
-    user = UserModel.find_by_id(root.user_id)
-    return user
+    return root.user
 
 
 @Post.field("comments")
@@ -87,9 +117,9 @@ def resolve_comments(root, info):
 
 @Comment.field("user")
 def resolve_user(root, info):
-    return UserModel.find_by_id(root.user_id)
+    return root.user
 
 
 @Comment.field("post")
 def resolve_post(root, info):
-    return PostModel.find_by_id(root.post_id)
+    return root.post

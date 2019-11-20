@@ -1,4 +1,15 @@
 type_defs = """
+    input CreateUserInput {
+        name: String!
+        username: String!
+        password: String!
+    }
+    input UpdateUserInput {
+        user_id: ID!
+        username: String
+        password: String
+        name: String
+    }
     type User {
         id: ID!
         username: String!
@@ -25,8 +36,11 @@ type_defs = """
         comment(comment_id: ID): Comment
     }
     type Mutation {
-        create_user(name: String! username: String! password: String!): User
+        create_user(data: CreateUserInput!): User
         create_post(user_id: ID! text: String!): Post
         create_comment(user_id: ID! post_id: ID! text: String!): Comment
+        update_user(data: UpdateUserInput!): User
+        update_post(post_id: ID! text: String!): Post
+        update_comment(comment_id: ID! text: String!): Comment
     }
 """
