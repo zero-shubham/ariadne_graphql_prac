@@ -2,7 +2,9 @@ from ariadne import graphql_sync, make_executable_schema
 from ariadne.constants import PLAYGROUND_HTML
 from flask import Flask, request, jsonify
 from schemas.schema import type_defs
-from resolvers.user import query, mutation, Post, User, Comment
+from resolvers.user import query, mutation, User
+from resolvers.comment import Comment
+from resolvers.post import Post
 
 
 schema = make_executable_schema(type_defs, [query, mutation, Post, User, Comment])
