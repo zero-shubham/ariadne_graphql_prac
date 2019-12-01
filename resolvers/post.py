@@ -26,6 +26,14 @@ def resolve_update_post(_, info, post_id, text):
     return post
 
 
+@mutation.field("delete_post")
+def resolve_delete_post(_, info, post_id):
+    post = PostModel.find_by_id(post_id)
+    if post:
+        post.delete_from_db()
+    return post
+
+
 @Post.field('user')
 def resolve_user(root, info):
     return root.user

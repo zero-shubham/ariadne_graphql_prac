@@ -9,7 +9,7 @@ class PostModel(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user = db.relationship("UserModel")
-    comments = db.relationship("CommentModel")
+    comments = db.relationship("CommentModel", cascade="all, delete-orphan")
 
     def __init__(self, user_id, text):
         self.text = text
@@ -26,6 +26,10 @@ class PostModel(db.Model):
     @classmethod
     def find_by_user_id(cls, user_id):
         return cls.query.filter_by(user_id=user_id).first()
+
+    @classmethod
+    def find_all_by_user_id(cls, user_id):
+        return cls.query.filter_by(user_id=user_id)
 
     @classmethod
     def find_by_id(cls, _id):

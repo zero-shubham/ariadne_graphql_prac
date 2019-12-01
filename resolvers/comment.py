@@ -26,6 +26,14 @@ def resolve_update_comment(_, info, comment_id, text):
     return comment
 
 
+@mutation.field("delete_comment")
+def resolve_delete_comment(_,info, comment_id):
+    comment = CommentModel.find_by_id(comment_id)
+    if comment:
+        comment.delete_from_db()
+    return comment
+
+
 @Comment.field("user")
 def resolve_user(root, info):
     return root.user

@@ -10,6 +10,10 @@ type_defs = """
         password: String
         name: String
     }
+    input DeleteUserInput {
+        user_id: ID
+        username: String
+    }
     type User {
         id: ID!
         username: String!
@@ -42,5 +46,8 @@ type_defs = """
         update_user(data: UpdateUserInput!): User
         update_post(post_id: ID! text: String!): Post
         update_comment(comment_id: ID! text: String!): Comment
+        delete_user(data: DeleteUserInput): User
+        delete_comment(comment_id: ID!): Comment
+        delete_post(post_id:  ID!): Post
     }
 """

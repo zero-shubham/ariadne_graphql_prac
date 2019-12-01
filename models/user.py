@@ -10,8 +10,8 @@ class UserModel(db.Model):
     password = db.Column(db.String(240), nullable=False)
     username = db.Column(db.String(100), nullable=False, unique=True)
 
-    posts = db.relationship("PostModel")
-    comments = db.relationship("CommentModel")
+    posts = db.relationship("PostModel", cascade="all, delete-orphan")
+    comments = db.relationship("CommentModel", cascade="all, delete-orphan")
 
     def __init__(self, name, username, password):
         self.name = name

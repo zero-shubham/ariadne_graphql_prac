@@ -1,5 +1,7 @@
 from ariadne import QueryType, MutationType, ObjectType
+from MyErrors import RequiredAtLeastOne
 from models.user import UserModel
+from models.post import PostModel
 
 query = QueryType()
 mutation = MutationType()
@@ -44,6 +46,21 @@ def resolve_update_user(_, info, data):
         elif key == "name":
             user.name = data[key]
     user.save_to_db()
+    return user
+
+
+@mutation.field("delete_user")
+def resolve_delete_user(_, info, data):
+    if "username" not in data.keys():
+        if "user_id" not in data.keys():
+            raise RequiredAtLeastOne("Required at least username or user_id.")
+        else:
+            user = UserModel.find_by_id(data["user_id"])
+    else:
+        user = UserModel.find_by_username(data["username"])
+    if user:
+        posts = PostModel.find_all_by_user_id(user.id)
+        user.delete_from_db()
     return user
 
 
