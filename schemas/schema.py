@@ -14,6 +14,11 @@ type_defs = """
         user_id: ID
         username: String
     }
+    type Login {
+        csrf: String!
+        refresh_csrf: String!
+        user: User!
+    }
     type User {
         id: ID!
         username: String!
@@ -49,5 +54,6 @@ type_defs = """
         delete_user(data: DeleteUserInput): User
         delete_comment(comment_id: ID!): Comment
         delete_post(post_id:  ID!): Post
+        login(username: String! password: String!): Login
     }
 """
