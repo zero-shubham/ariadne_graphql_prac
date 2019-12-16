@@ -11,7 +11,8 @@ from flask_jwt_extended import (
     fresh_jwt_required,
     create_access_token,
     create_refresh_token,
-    get_csrf_token
+    get_csrf_token,
+    verify_fresh_jwt_in_request
 )
 import datetime
 from middlewares import set_var, yo
@@ -49,9 +50,8 @@ def resolve_create_user(_, info, data):
 
 
 @mutation.field("update_user")
-@yo
+@jwt_required
 def resolve_update_user(_, info, data):
-    fresh_jwt_required(info[-1])
     user = UserModel.find_by_id(data["user_id"])
     for key in data.keys():
         if key == "password":
