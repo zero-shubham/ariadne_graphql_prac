@@ -8,7 +8,9 @@ from resolvers.post import Post
 from flask_jwt_extended import (JWTManager,
                                 set_access_cookies,
                                 set_refresh_cookies)
+from db import jwt
 from middlewares import get_var
+from blacklist import BLACKLIST
 
 schema = make_executable_schema(type_defs, [query, mutation, Post, User, Comment])
 
@@ -28,7 +30,11 @@ app.config["JWT_BLACKLIST_ENABLED"] = True
 app.config["JWT_BLACKLIST_TOKEN_CHECKS"] = ["access", "refresh"]
 
 app.secret_key = "secretive"
-jwt = JWTManager(app)
+
+
+@jwt.token_in_blacklist_loader
+def check_if_token_in_blacklist(decrypted_token):
+    return decrypted_token["jti"] in BLACKLIST
 
 
 @app.route("/graphql", methods=["GET"])
@@ -64,9 +70,10 @@ def graphql_server():
 
 
 if __name__ == "__main__":
-    from db import db
+    from db import db, jwt
     @app.before_first_request
     def create_tables():
         db.create_all()
     db.init_app(app)
+    jwt.init_app(app)
     app.run(debug=True)
