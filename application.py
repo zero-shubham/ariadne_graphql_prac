@@ -5,11 +5,12 @@ from schemas.schema import type_defs
 from resolvers.user import query, mutation, User
 from resolvers.comment import Comment
 from resolvers.post import Post
-from flask_jwt_extended import (JWTManager,
-                                set_access_cookies,
-                                set_refresh_cookies)
+from flask_jwt_extended import (set_access_cookies,
+                                set_refresh_cookies,
+                                unset_access_cookies,
+                                unset_refresh_cookies)
 from db import jwt
-from middlewares import get_var
+from tokens import get_tokens, set_tokens
 from blacklist import BLACKLIST
 
 schema = make_executable_schema(type_defs, [query, mutation, Post, User, Comment])
@@ -30,6 +31,7 @@ app.config["JWT_BLACKLIST_ENABLED"] = True
 app.config["JWT_BLACKLIST_TOKEN_CHECKS"] = ["access", "refresh"]
 
 app.secret_key = "secretive"
+jwt.init_app(app)
 
 
 @jwt.token_in_blacklist_loader
@@ -52,28 +54,43 @@ def graphql_server():
     data = request.get_json()
     # Note: Passing the request to the context is optional.
     # In Flask, the current request is always accessible as flask.request
-    success, result = graphql_sync(
-        schema,
-        data,
-        context_value=request,
-        debug=app.debug
-    )
-    var = get_var()
-    if var:
-        result = jsonify(result)
-        set_access_cookies(result, var["access_token"])
-        set_refresh_cookies(result, var["refresh_token"])
+
+    # if the cookie contains "access_token_cookie" and "refresh_token_cookie"
+    # set those tokens to tokens global variable
+    # this way we can make sure  every has token
+    if request.cookies:
+        set_tokens(request.cookies)
+    try:
+        success, result = graphql_sync(
+            schema,
+            data,
+            context_value=request,
+            debug=app.debug
+        )
+    except Exception as e:
+        return {
+            "message": "Something went wrong."
+        }, 500
+    tokens = get_tokens()
+    result = jsonify(result)
+    if tokens:
+        set_access_cookies(result, tokens["access_token_cookie"])
+        set_refresh_cookies(result, tokens["refresh_token_cookie"])
     else:
-        result = jsonify(result)
+        unset_access_cookies(result)
+        unset_refresh_cookies(result)
     status_code = 200 if success else 400
     return result, status_code
 
 
 if __name__ == "__main__":
-    from db import db, jwt
+    from db import db
+
+
     @app.before_first_request
     def create_tables():
         db.create_all()
+
+
     db.init_app(app)
-    jwt.init_app(app)
     app.run(debug=True)

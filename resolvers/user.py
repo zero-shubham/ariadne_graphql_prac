@@ -14,8 +14,9 @@ from flask_jwt_extended import (
     get_csrf_token,
     verify_fresh_jwt_in_request
 )
+from blacklist import BLACKLIST
 import datetime
-from middlewares import set_var, yo
+from tokens import set_tokens
 
 query = QueryType()
 mutation = MutationType()
@@ -83,17 +84,28 @@ def resolve_delete_user(_, info, data):
 @mutation.field("login")
 def resolve_login(_, info, username, password):
     user = UserModel.find_by_username(username)
-    print(user, password)
     if user and check_password_hash(user.password, password):
         expires = datetime.timedelta(days=3)
         access_token = create_access_token(identity=user.id, fresh=True, expires_delta=expires)
         refresh_token = create_refresh_token(user.id)
-        set_var({"access_token": access_token, "refresh_token": refresh_token})
+        set_tokens({"access_token_cookie": access_token, "refresh_token_cookie": refresh_token})
         return {
             "csrf": get_csrf_token(access_token),
             "refresh_csrf": get_csrf_token(refresh_token),
             "user": user
         }
+
+
+@mutation.field("logout")
+@jwt_required
+def resolve_logout(_, info):
+    current_user_id = get_jwt_identity()
+    jti = get_raw_jwt()["jti"]
+    BLACKLIST.add(jti)
+    set_tokens(None)
+    return {
+        "message": "You have been logged out successfully."
+    }
 
 
 @User.field("posts")
